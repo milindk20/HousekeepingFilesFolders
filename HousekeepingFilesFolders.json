@@ -1,0 +1,50 @@
+{
+    "folders": [
+        {
+            "path": "C:\\Users\\Milind\\Desktop\\Repos\\tests",
+            "extensions": [],
+            "age_limit": {
+                "days": 0,
+                "hours": 0,
+                "minutes": 1
+            },
+            "action": "gzip"
+        },    
+        {
+            "path": "C:\\Users\\Milind\\Desktop\\Repos\\tests2",
+            "extensions": [".log", ".txt", ".md"],
+            "age_limit": {
+                "days":0,
+                "hours": 0,
+                "minutes": 1
+            },
+            "action": "gzip"
+        },
+
+
+
+
+
+
+        {
+            "path": "C:\\Users\\Milind\\Desktop\\Repos\\tests",
+            "extensions": [],
+            "age_limit": {
+                "days": 0,
+                "hours": 0,
+                "minutes": 3
+            },
+            "action": "delete"
+        },
+        {
+            "path": "C:\\Users\\Milind\\Desktop\\Repos\\tests2",
+            "extensions": [".gz",".bak"],
+            "age_limit": {
+                "days": 0,
+                "hours":0 ,
+                "minutes": 3
+            },
+            "action": "delete"
+        }
+    ]
+}

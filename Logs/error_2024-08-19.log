@@ -1,0 +1,3 @@
+An error occurred during housekeeping in folder 'C:\Users\Milind\Desktop\Repos\tests2'. Exception: endswith first arg must be str or a tuple of str, not list
+Failed to complete housekeeping. Exception: endswith first arg must be str or a tuple of str, not list
+Critical Error: The script encountered an unrecoverable error. Exception: endswith first arg must be str or a tuple of str, not list
