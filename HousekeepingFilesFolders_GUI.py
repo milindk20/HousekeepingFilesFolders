@@ -48,6 +48,8 @@ class HousekeepingGUI:
         test_btn.pack(side='left', padx=(0, 8), ipadx=8, ipady=2)
         reload_btn = ttk.Button(btn_frame, text="⟳ Reload Config", command=self.load_config)
         reload_btn.pack(side='left', padx=(0, 8), ipadx=8, ipady=2)
+        edit_file_btn = ttk.Button(btn_frame, text="📝 Edit Config File", command=self.open_config_in_editor)
+        edit_file_btn.pack(side='left', padx=(0, 8), ipadx=8, ipady=2)
 
         # Table for config editing
         columns = ("folder", "action", "enabled", "extensions", "days", "hours", "minutes")
@@ -66,16 +68,9 @@ class HousekeepingGUI:
 
         self.load_config()
 
-        # --- Logs Tab with sub-tabs ---
+        # --- Logs Tab (single tab, no error tab) ---
         logs_frame = tk.Frame(self.notebook)
         self.notebook.add(logs_frame, text="Logs")
-
-        self.logs_notebook = ttk.Notebook(logs_frame)
-        self.logs_notebook.pack(fill='both', expand=True)
-
-        # Housekeeping Logs Tab
-        housekeeping_frame = tk.Frame(self.logs_notebook)
-        self.logs_notebook.add(housekeeping_frame, text="Housekeeping Logs")
 
         # Dropdown for log files
         self.log_files = sorted(glob.glob(os.path.join(LOG_DIR, "housekeeping*.log")), reverse=True)
@@ -85,7 +80,7 @@ class HousekeepingGUI:
         else:
             self.selected_log.set("")
 
-        dropdown_frame = tk.Frame(housekeeping_frame)
+        dropdown_frame = tk.Frame(logs_frame)
         dropdown_frame.pack(anchor='w', pady=2)
         tk.Label(dropdown_frame, text="Select log file:").pack(side='left')
         self.log_dropdown = ttk.Combobox(dropdown_frame, values=[os.path.basename(f) for f in self.log_files], state="readonly", width=40)
@@ -94,43 +89,12 @@ class HousekeepingGUI:
         self.log_dropdown.pack(side='left', padx=5)
         self.log_dropdown.bind("<<ComboboxSelected>>", self.on_logfile_selected)
 
-        self.housekeeping_logs_text = scrolledtext.ScrolledText(housekeeping_frame, width=90, height=25, state='disabled')
+        self.housekeeping_logs_text = scrolledtext.ScrolledText(logs_frame, width=90, height=25, state='disabled')
         self.housekeeping_logs_text.pack()
-        tk.Button(housekeeping_frame, text="Reload Housekeeping Logs", command=self.reload_log_dropdown).pack(pady=5)
-
-        # Error Logs Tab
-        error_frame = tk.Frame(self.logs_notebook)
-        self.logs_notebook.add(error_frame, text="Error Logs")
-
-        # Dropdown for error log files
-        self.error_log_files = sorted(glob.glob(os.path.join(LOG_DIR, "error*.log")), reverse=True)
-        self.selected_error_log = tk.StringVar()
-        if self.error_log_files:
-            self.selected_error_log.set(self.error_log_files[0])
-        else:
-            self.selected_error_log.set("")
-
-        error_dropdown_frame = tk.Frame(error_frame)
-        error_dropdown_frame.pack(anchor='w', pady=2)
-        tk.Label(error_dropdown_frame, text="Select error log file:").pack(side='left')
-        self.error_log_dropdown = ttk.Combobox(
-            error_dropdown_frame,
-            values=[os.path.basename(f) for f in self.error_log_files],
-            state="readonly",
-            width=40
-        )
-        if self.error_log_files:
-            self.error_log_dropdown.current(0)
-        self.error_log_dropdown.pack(side='left', padx=5)
-        self.error_log_dropdown.bind("<<ComboboxSelected>>", self.on_error_logfile_selected)
-
-        self.error_logs_text = scrolledtext.ScrolledText(error_frame, width=90, height=25, state='disabled')
-        self.error_logs_text.pack()
-        tk.Button(error_frame, text="Reload Error Logs", command=self.reload_error_log_dropdown).pack(pady=5)
+        tk.Button(logs_frame, text="Reload Housekeeping Logs", command=self.reload_log_dropdown).pack(pady=5)
 
         # Initial load
         self.load_housekeeping_logs()
-        self.load_error_logs()
 
     def reload_log_dropdown(self):
         self.log_files = sorted(glob.glob(os.path.join(LOG_DIR, "housekeeping*.log")), reverse=True)
@@ -143,17 +107,6 @@ class HousekeepingGUI:
             self.selected_log.set("")
         self.load_housekeeping_logs()
 
-    def reload_error_log_dropdown(self):
-        self.error_log_files = sorted(glob.glob(os.path.join(LOG_DIR, "error*.log")), reverse=True)
-        self.error_log_dropdown['values'] = [os.path.basename(f) for f in self.error_log_files]
-        if self.error_log_files:
-            self.error_log_dropdown.current(0)
-            self.selected_error_log.set(self.error_log_files[0])
-        else:
-            self.error_log_dropdown.set("")
-            self.selected_error_log.set("")
-        self.load_error_logs()
-
     def on_logfile_selected(self, event=None):
         idx = self.log_dropdown.current()
         if idx >= 0 and idx < len(self.log_files):
@@ -165,18 +118,6 @@ class HousekeepingGUI:
             self.housekeeping_logs_text.delete(1.0, tk.END)
             self.housekeeping_logs_text.insert(tk.END, "No housekeeping log files found.\n")
             self.housekeeping_logs_text.config(state='disabled')
-
-    def on_error_logfile_selected(self, event=None):
-        idx = self.error_log_dropdown.current()
-        if idx >= 0 and idx < len(self.error_log_files):
-            self.selected_error_log.set(self.error_log_files[idx])
-            self.load_error_logs()
-        else:
-            self.selected_error_log.set("")
-            self.error_logs_text.config(state='normal')
-            self.error_logs_text.delete(1.0, tk.END)
-            self.error_logs_text.insert(tk.END, "No error log files found.\n")
-            self.error_logs_text.config(state='disabled')
 
     def load_config(self):
         # Load config and populate the table
@@ -262,11 +203,9 @@ class HousekeepingGUI:
             )
             messagebox.showinfo("Housekeeping Complete", result.stdout or "Housekeeping finished.")
             self.load_housekeeping_logs()
-            self.load_error_logs()
         except subprocess.CalledProcessError as e:
             messagebox.showerror("Error", f"Housekeeping failed:\n{e.stderr}")
             self.load_housekeeping_logs()
-            self.load_error_logs()
 
     def run_test_script(self):
         try:
@@ -296,23 +235,21 @@ class HousekeepingGUI:
                 self.housekeeping_logs_text.insert(tk.END, f"Could not read {log_file}: {e}\n\n")
         self.housekeeping_logs_text.config(state='disabled')
 
-    def load_error_logs(self):
-        self.error_logs_text.config(state='normal')
-        self.error_logs_text.delete(1.0, tk.END)
-        error_log_file = self.selected_error_log.get() if self.selected_error_log.get() else (self.error_log_files[0] if self.error_log_files else None)
-        if not error_log_file or not os.path.exists(error_log_file):
-            self.error_logs_text.insert(tk.END, "No error log files found.\n")
-        else:
-            try:
-                with open(error_log_file, "r") as f:
-                    lines = f.readlines()
-                reversed_lines = lines[::-1]
-                self.error_logs_text.insert(tk.END, f"--- {os.path.basename(error_log_file)} ---\n")
-                self.error_logs_text.insert(tk.END, ''.join(reversed_lines))
-                self.error_logs_text.insert(tk.END, "\n")
-            except Exception as e:
-                self.error_logs_text.insert(tk.END, f"Could not read {error_log_file}: {e}\n\n")
-        self.error_logs_text.config(state='disabled')
+    def open_config_in_editor(self):
+        # Open the config file in the user's default editor
+        import subprocess
+        import platform
+        try:
+            if platform.system() == "Linux":
+                subprocess.Popen(["xdg-open", CONFIG_PATH])
+            elif platform.system() == "Darwin":
+                subprocess.Popen(["open", CONFIG_PATH])
+            elif platform.system() == "Windows":
+                os.startfile(CONFIG_PATH)
+            else:
+                messagebox.showerror("Error", "Unsupported OS for opening files.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open config file:\n{e}")
 
 if __name__ == "__main__":
     root = tk.Tk()
