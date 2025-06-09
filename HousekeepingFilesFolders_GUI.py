@@ -32,26 +32,39 @@ class HousekeepingGUI:
         config_frame = ttk.Frame(self.notebook, style='Config.TFrame')
         self.notebook.add(config_frame, text="Housekeeping")
 
+        # Title at the top
         title_label = ttk.Label(config_frame, text="Edit Housekeeping Config", style='Config.TLabel')
-        title_label.pack(anchor='center', pady=(15, 5))
+        title_label.pack(anchor='nw', pady=(15, 5), padx=20)
 
-        self.text = scrolledtext.ScrolledText(
-            config_frame, width=90, height=25, font=('Consolas', 11), background='#f8f8ff', foreground='#222', borderwidth=2, relief='groove', wrap='word'
-        )
-        self.text.pack(padx=20, pady=(0, 10), fill='both', expand=True)
-        self.load_config()
-
+        # Button row below title
         btn_frame = tk.Frame(config_frame, bg='#f5f6fa')
-        btn_frame.pack(pady=10)
+        btn_frame.pack(anchor='nw', padx=20, pady=(0, 10), fill='x')
 
         save_btn = ttk.Button(btn_frame, text="💾 Save Config", command=self.save_config)
-        save_btn.pack(side='left', padx=8)
+        save_btn.pack(side='left', padx=(0, 8), ipadx=8, ipady=2)
         run_btn = ttk.Button(btn_frame, text="▶ Run Housekeeping", command=self.run_housekeeping)
-        run_btn.pack(side='left', padx=8)
+        run_btn.pack(side='left', padx=(0, 8), ipadx=8, ipady=2)
         test_btn = ttk.Button(btn_frame, text="🧪 Generate Test Files", command=self.run_test_script)
-        test_btn.pack(side='left', padx=8)
+        test_btn.pack(side='left', padx=(0, 8), ipadx=8, ipady=2)
         reload_btn = ttk.Button(btn_frame, text="⟳ Reload Config", command=self.load_config)
-        reload_btn.pack(side='left', padx=8)
+        reload_btn.pack(side='left', padx=(0, 8), ipadx=8, ipady=2)
+
+        # Table for config editing
+        columns = ("folder", "action", "enabled", "extensions", "days", "hours", "minutes")
+        self.tree = ttk.Treeview(config_frame, columns=columns, show="headings", height=15)
+        for col in columns:
+            self.tree.heading(col, text=col)
+            self.tree.column(col, width=120, anchor='center')
+        self.tree.pack(padx=20, pady=(0, 10), fill='both', expand=True)
+
+        # Buttons for row operations
+        row_btn_frame = tk.Frame(config_frame, bg='#f5f6fa')
+        row_btn_frame.pack(anchor='nw', padx=20, pady=(0, 10))
+        ttk.Button(row_btn_frame, text="Add Row", command=self.add_row).pack(side='left', padx=5)
+        ttk.Button(row_btn_frame, text="Edit Row", command=self.edit_row).pack(side='left', padx=5)
+        ttk.Button(row_btn_frame, text="Delete Row", command=self.delete_row).pack(side='left', padx=5)
+
+        self.load_config()
 
         # --- Logs Tab with sub-tabs ---
         logs_frame = tk.Frame(self.notebook)
@@ -166,22 +179,80 @@ class HousekeepingGUI:
             self.error_logs_text.config(state='disabled')
 
     def load_config(self):
+        # Load config and populate the table
         try:
             with open(CONFIG_PATH, "r") as f:
                 data = json.load(f)
-            self.text.delete(1.0, tk.END)
-            self.text.insert(tk.END, json.dumps(data, indent=4))
+            self.tree.delete(*self.tree.get_children())
+            for rule in data.get("rules", []):
+                self.tree.insert("", "end", values=(
+                    rule.get("folder", ""),
+                    rule.get("action", ""),
+                    rule.get("enabled", ""),
+                    rule.get("extensions", ""),
+                    rule.get("days", ""),
+                    rule.get("hours", ""),
+                    rule.get("minutes", "")
+                ))
         except Exception as e:
             messagebox.showerror("Error", f"Failed to load config: {e}")
 
     def save_config(self):
+        # Save the table back to config
         try:
-            data = json.loads(self.text.get(1.0, tk.END))
+            rules = []
+            for row in self.tree.get_children():
+                values = self.tree.item(row)["values"]
+                rules.append({
+                    "folder": values[0],
+                    "action": values[1],
+                    "enabled": values[2],
+                    "extensions": values[3],
+                    "days": int(values[4]),
+                    "hours": int(values[5]),
+                    "minutes": int(values[6])
+                })
             with open(CONFIG_PATH, "w") as f:
-                json.dump(data, f, indent=4)
+                json.dump({"rules": rules}, f, indent=4)
             messagebox.showinfo("Success", "Config saved successfully.")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save config: {e}")
+
+    def add_row(self):
+        # Simple dialog for adding a row
+        self.edit_row(new=True)
+
+    def edit_row(self, new=False):
+        # Edit selected row or add new
+        import tkinter.simpledialog as sd
+        columns = ("folder", "action", "enabled", "extensions", "days", "hours", "minutes")
+        if not new:
+            selected = self.tree.selection()
+            if not selected:
+                messagebox.showwarning("Select Row", "Please select a row to edit.")
+                return
+            values = self.tree.item(selected[0])["values"]
+        else:
+            values = ["", "", "", "", "0", "0", "0"]
+
+        # Simple dialog for each field
+        new_values = []
+        for i, col in enumerate(columns):
+            val = sd.askstring("Edit", f"Enter {col}:", initialvalue=values[i])
+            if val is None:
+                return  # Cancelled
+            new_values.append(val)
+        if new:
+            self.tree.insert("", "end", values=new_values)
+        else:
+            self.tree.item(selected[0], values=new_values)
+
+    def delete_row(self):
+        selected = self.tree.selection()
+        if not selected:
+            messagebox.showwarning("Select Row", "Please select a row to delete.")
+            return
+        self.tree.delete(selected[0])
 
     def run_housekeeping(self):
         try:
