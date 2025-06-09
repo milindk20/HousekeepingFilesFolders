@@ -5,16 +5,13 @@ import json
 import logging
 from datetime import datetime, timedelta
 
-def load_config(config_path):
-    try:
-        with open(config_path, 'r') as config_file:
-            return json.load(config_file)
-    except FileNotFoundError:
-        logging.error(f"Configuration file '{config_path}' not found.")
-        raise
-    except json.JSONDecodeError:
-        logging.error(f"Configuration file '{config_path}' is not a valid JSON.")
-        raise
+CONFIG_PATH = "HousekeepingFilesFolders.json"
+
+def load_config():
+    with open(CONFIG_PATH, "r") as f:
+        config = json.load(f)
+    # Now config["rules"] is a list of rule dicts
+    return config.get("rules", [])
 
 # Log directory and file names
 log_dir = "Logs"
@@ -98,15 +95,21 @@ def perform_housekeeping(folder):
 def main():
     setup_logging()
     logging.info("Housekeeping process started.")
-    config_path = 'HousekeepingFilesFolders.json'  # Change to your config path
 
-    try:
-        config = load_config(config_path)
-        for folder_config in config['folders']:
+    rules = load_config()
+    for rule in rules:
+        folder = rule.get("folder")
+        action = rule.get("action")
+        enabled = rule.get("enabled", "yes").lower() == "yes"
+        extensions = rule.get("extensions", "")
+        days = int(rule.get("days", 0))
+        hours = int(rule.get("hours", 0))
+        minutes = int(rule.get("minutes", 0))
+        age_limit = {'days': days, 'hours': hours, 'minutes': minutes}
+        folder_config = {'path': folder, 'action': action, 'extensions': extensions.split(','), 'age_limit': age_limit}
+
+        if enabled:
             perform_housekeeping(folder_config)
-    except Exception as e:
-        logging.critical(f"Failed to complete housekeeping. Exception: {e}")
-        raise
 
     logging.info("Housekeeping process completed.")
 
