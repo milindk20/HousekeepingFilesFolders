@@ -4,7 +4,7 @@ import random
 import string
 from datetime import datetime, timedelta
 
-CONFIG_PATH = os.path.join(os.path.dirname(__file__), "HousekeepingFilesFolders.json")
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), "HousekeepingFiles.json")
 
 def random_filename(ext):
     name = ''.join(random.choices(string.ascii_lowercase, k=8))

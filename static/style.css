@@ -1,0 +1,21 @@
+body { font-family: Arial, sans-serif; background: #f5f6fa; margin: 0; }
+.container { max-width: 1100px; margin: 30px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #ccc; padding: 30px; }
+h1 { color: #273c75; }
+table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+th, td { border: 1px solid #bbb; padding: 15px 10px; text-align: center; }
+th { background: #dff0fa; }
+tr:nth-child(even) { background: #f8f8ff; }
+.btn { padding: 7px 18px; border: none; border-radius: 4px; background: #273c75; color: #fff; font-size: 15px; cursor: pointer; margin-right: 8px;}
+.btn:hover { background: #40739e; }
+.btn-danger { background: #e84118; }
+.btn-danger:hover { background: #c23616; }
+.btn-secondary { background: #718093; }
+.btn-secondary:hover { background: #353b48; }
+.msg { color: #27ae60; font-weight: bold; }
+.error { color: #e84118; font-weight: bold; }
+textarea { width: 100%; min-height: 120px; font-family: monospace; font-size: 15px; }
+.logbox { background: #222; color: #eee; padding: 12px; border-radius: 6px; font-size: 14px; max-height: 350px; overflow-y: auto; white-space: pre-wrap;}
+.row-btns { margin-bottom: 18px; }
+.row-btns form { display: inline; }
+label { display: block; margin-top: 12px; }
+input, select { width: 100%; padding: 7px; margin-top: 4px; border-radius: 4px; border: 1px solid #bbb; font-size: 15px; }

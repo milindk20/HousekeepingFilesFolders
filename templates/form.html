@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ 'Edit' if edit else 'Add' }} Rule</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h2>{{ 'Edit' if edit else 'Add' }} Rule</h2>
+    <form method="post">
+        <label>Folder: <input name="folder" required value="{{ rule.folder }}"></label>
+        <label>Action:
+            <select name="action" required>
+                <option value="gzip" {% if rule.action == "gzip" %}selected{% endif %}>gzip</option>
+                <option value="delete" {% if rule.action == "delete" %}selected{% endif %}>delete</option>
+            </select>
+        </label>
+        <label>Enabled:
+            <select name="enabled">
+                <option value="yes" {% if rule.enabled == "yes" %}selected{% endif %}>yes</option>
+                <option value="no" {% if rule.enabled == "no" %}selected{% endif %}>no</option>
+            </select>
+        </label>
+        <label>Extensions (comma separated, e.g. .log, .txt): <input name="extensions" value="{{ rule.extensions }}"></label>
+        <label>Days: <input name="days" type="number" min="0" value="{{ rule.days }}"></label>
+        <label>Hours: <input name="hours" type="number" min="0" value="{{ rule.hours }}"></label>
+        <label>Minutes: <input name="minutes" type="number" min="0" value="{{ rule.minutes }}"></label>
+        <button class="btn" type="submit">Save</button>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+</body>
+</html>

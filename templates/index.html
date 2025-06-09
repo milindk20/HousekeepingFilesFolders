@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Housekeeping Web Interface</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>Housekeeping Web Interface</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="{{category}}">{{msg}}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <h2>Config Rules</h2>
+    <div class="row-btns">
+        <a href="{{ url_for('add_rule') }}" class="btn">Add Rule</a>
+        <a href="{{ url_for('edit_config') }}" class="btn btn-secondary">Edit Config (Raw JSON)</a>
+        <form method="post" action="{{ url_for('run_housekeeping') }}" style="display:inline;">
+            <button class="btn" type="submit">Run Housekeeping</button>
+        </form>
+        <form method="post" action="{{ url_for('generate_test_files') }}" style="display:inline;">
+            <button class="btn btn-secondary" type="submit">Generate Test Files</button>
+        </form>
+    </div>
+    <table>
+        <tr>
+            <th>#</th>
+            <th>Folder</th>
+            <th>Action</th>
+            <th>Enabled</th>
+            <th>Extensions</th>
+            <th>Days</th>
+            <th>Hours</th>
+            <th>Minutes</th>
+            <th>Actions</th>
+        </tr>
+        {% for rule in rules %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{rule.folder}}</td>
+            <td>{{rule.action}}</td>
+            <td>{{rule.enabled}}</td>
+            <td>{{rule.extensions}}</td>
+            <td>{{rule.days}}</td>
+            <td>{{rule.hours}}</td>
+            <td>{{rule.minutes}}</td>
+            <td>
+                <a href="{{ url_for('edit_rule', idx=loop.index0) }}" class="btn btn-secondary">Edit</a>
+                <a href="{{ url_for('delete_rule', idx=loop.index0) }}" class="btn btn-danger" onclick="return confirm('Delete this rule?');">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Housekeeping Log</h2>
+    <div class="logbox">
+        {{ log_content }}
+    </div>
+</div>
+</body>
+</html>

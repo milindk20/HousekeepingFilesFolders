@@ -22,7 +22,7 @@
             "folder": "/home/milind/Desktop/repo/tests",
             "action": "delete",
             "enabled": "yes",
-            "extensions": ".log , .txt",
+            "extensions": ".gz",
             "days": 0,
             "hours": 0,
             "minutes": 3
@@ -31,7 +31,7 @@
             "folder": "/home/milind/Desktop/repo/tests2",
             "action": "delete",
             "enabled": "yes",
-            "extensions": ".log , .txt",
+            "extensions": ".gz",
             "days": 0,
             "hours": 0,
             "minutes": 3
