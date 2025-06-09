@@ -7,10 +7,10 @@ import glob
 
 CONFIG_PATH = "HousekeepingFilesFolders.json"
 HOUSEKEEPING_SCRIPT = "HousekeepingFilesFolders.py"
-TEST_SCRIPT = os.path.join("Testing", "create_filesfortesting.py")
+TEST_SCRIPT = "create_filesfortesting.py"
 LOG_DIR = "Logs"
 LOG_FILE = os.path.join(LOG_DIR, "housekeeping.log")
-ERROR_LOG_FILE = os.path.join(LOG_DIR, "error.log")  # Assumes error log is named error.log
+#ERROR_LOG_FILE = os.path.join(LOG_DIR, "error.log")  # Assumes error log is named error.log
 
 class HousekeepingGUI:
     def __init__(self, root):
@@ -164,8 +164,42 @@ class HousekeepingGUI:
         self.edit_row(new=True)
 
     def edit_row(self, new=False):
-        # Edit selected row or add new
+        # Edit selected row or add new using a single dialog window
         import tkinter.simpledialog as sd
+
+        class EditDialog(tk.Toplevel):
+            def __init__(self, master, columns, values):
+                super().__init__(master)
+                self.title("Edit Row")
+                self.resizable(False, False)
+                self.result = None
+                self.entries = []
+                for i, col in enumerate(columns):
+                    tk.Label(self, text=col + ":").grid(row=i, column=0, sticky='e', padx=8, pady=4)
+                    entry = tk.Entry(self, width=40)
+                    entry.grid(row=i, column=1, padx=8, pady=4)
+                    entry.insert(0, values[i])
+                    self.entries.append(entry)
+                btn_frame = tk.Frame(self)
+                btn_frame.grid(row=len(columns), column=0, columnspan=2, pady=8)
+                ok_btn = ttk.Button(btn_frame, text="OK", command=self.on_ok)
+                ok_btn.pack(side='left', padx=5)
+                cancel_btn = ttk.Button(btn_frame, text="Cancel", command=self.on_cancel)
+                cancel_btn.pack(side='left', padx=5)
+                self.bind("<Return>", lambda e: self.on_ok())
+                self.bind("<Escape>", lambda e: self.on_cancel())
+                self.grab_set()
+                self.protocol("WM_DELETE_WINDOW", self.on_cancel)
+                self.wait_window(self)
+
+            def on_ok(self):
+                self.result = [e.get() for e in self.entries]
+                self.destroy()
+
+            def on_cancel(self):
+                self.result = None
+                self.destroy()
+
         columns = ("folder", "action", "enabled", "extensions", "days", "hours", "minutes")
         if not new:
             selected = self.tree.selection()
@@ -176,17 +210,12 @@ class HousekeepingGUI:
         else:
             values = ["", "", "", "", "0", "0", "0"]
 
-        # Simple dialog for each field
-        new_values = []
-        for i, col in enumerate(columns):
-            val = sd.askstring("Edit", f"Enter {col}:", initialvalue=values[i])
-            if val is None:
-                return  # Cancelled
-            new_values.append(val)
-        if new:
-            self.tree.insert("", "end", values=new_values)
-        else:
-            self.tree.item(selected[0], values=new_values)
+        dialog = EditDialog(self.root, columns, values)
+        if dialog.result:
+            if new:
+                self.tree.insert("", "end", values=dialog.result)
+            else:
+                self.tree.item(selected[0], values=dialog.result)
 
     def delete_row(self):
         selected = self.tree.selection()
