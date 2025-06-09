@@ -5,7 +5,7 @@ import json
 import logging
 from datetime import datetime, timedelta
 
-CONFIG_PATH = "HousekeepingFilesFolders.json"
+CONFIG_PATH = "HousekeepingFiles.json"
 
 def load_config():
     with open(CONFIG_PATH, "r") as f:

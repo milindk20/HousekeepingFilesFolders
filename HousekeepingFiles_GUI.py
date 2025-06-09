@@ -5,8 +5,8 @@ import json
 import os
 import glob
 
-CONFIG_PATH = "HousekeepingFilesFolders.json"
-HOUSEKEEPING_SCRIPT = "HousekeepingFilesFolders.py"
+CONFIG_PATH = "HousekeepingFiles.json"
+HOUSEKEEPING_SCRIPT = "HousekeepingFiles_main.py"
 TEST_SCRIPT = "create_filesfortesting.py"
 LOG_DIR = "Logs"
 LOG_FILE = os.path.join(LOG_DIR, "housekeeping.log")
@@ -15,7 +15,7 @@ LOG_FILE = os.path.join(LOG_DIR, "housekeeping.log")
 class HousekeepingGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Housekeeping Files & Folders GUI")
+        self.root.title("Housekeeping Files GUI")
 
         style = ttk.Style()
         style.theme_use('clam')
