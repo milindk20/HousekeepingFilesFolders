@@ -106,7 +106,12 @@ def main():
         hours = int(rule.get("hours", 0))
         minutes = int(rule.get("minutes", 0))
         age_limit = {'days': days, 'hours': hours, 'minutes': minutes}
-        folder_config = {'path': folder, 'action': action, 'extensions': extensions.split(','), 'age_limit': age_limit}
+        folder_config = {
+            'path': folder,
+            'action': action,
+            'extensions': [e.strip() for e in extensions.split(',') if e.strip()],
+            'age_limit': age_limit
+        }
 
         if enabled:
             perform_housekeeping(folder_config)
